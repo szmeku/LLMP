@@ -19,7 +19,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
    config.vm.provider :virtualbox do |vb|
   #   vb.gui = true
-     vb.customize ["modifyvm", :id, "--hwvirtex", "off", "--memory", "2048"]
+     vb.customize [
+      "modifyvm", :id,
+
+      # older cpus
+      #"--hwvirtex", "off",
+
+      "--memory", "2048"]
   end
   
   config.vm.provision :puppet do |puppet|

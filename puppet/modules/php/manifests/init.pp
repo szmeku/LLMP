@@ -2,6 +2,7 @@
 #
 # Installs PHP5 and necessary modules. Sets config files.
 #
+
 class php {
   package { [
              'php5-cli',
@@ -29,4 +30,22 @@ class php {
       require => Package['php5-cgi'];
   }
 
+  class { 'composer':
+    'target_dir'   => '/usr/local/bin',
+    'user'         => 'root',
+    'command_name' => 'composer',
+    'auto_update'  => true
+  }
+
+
+}
+
+
+include composer
+
+class { 'composer':
+  'target_dir'   => '/usr/local/bin',
+  'user'         => 'root',
+  'command_name' => 'composer',
+  'auto_update'  => true
 }
