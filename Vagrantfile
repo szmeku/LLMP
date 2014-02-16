@@ -7,17 +7,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   # 32 BIT
-  config.vm.box = "debian32"
-  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
+  #config.vm.box = "debian32"
+  #config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
 
   # 64 BIT  
-#  config.vm.box = "debian64"
-#  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x64-virtualbox-puppet.box"
+  config.vm.box = "debian64"
+  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x64-virtualbox-puppet.box"
 
-   config.vm.network :private_network, ip: "192.168.33.10"
-   config.vm.synced_folder "../../projects", "/home/vagrant/projects"
+  config.vm.network :private_network, ip: "192.168.33.10"
+  config.vm.synced_folder "../../projects", "/home/vagrant/projects"
 
-   config.vm.provider :virtualbox do |vb|
+  config.vm.provider :virtualbox do |vb|
   #   vb.gui = true
      vb.customize [
       "modifyvm", :id,
