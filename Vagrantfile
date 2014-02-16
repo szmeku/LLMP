@@ -15,7 +15,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x64-virtualbox-puppet.box"
 
   config.vm.network :private_network, ip: "192.168.33.10"
-  config.vm.synced_folder "../../projects", "/home/vagrant/projects"
+  # config.vm.synced_folder "../../projects", "/home/vagrant/projects"
+
+  config.vm.synced_folder "../../projects", "/home/vagrant/projects",
+    id: "vagrant-root",
+    owner: "vagrant",
+    group: "www-data",
+    mount_options: ["dmode=775,fmode=664"]
+
 
   config.vm.provider :virtualbox do |vb|
   #   vb.gui = true
