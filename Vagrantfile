@@ -7,12 +7,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   # 32 BIT
-  #config.vm.box = "debian32"
-  #config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
+  config.vm.box = "centos32"
+  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-i386-virtualbox-puppet.box"
 
   # 64 BIT  
-  config.vm.box = "debian64"
-  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x64-virtualbox-puppet.box"
+  #config.vm.box = "centos64"
+  #config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-x64-virtualbox-puppet.box"
 
   config.vm.network :private_network, ip: "192.168.33.10"
   # config.vm.synced_folder "../../projects", "/home/vagrant/projects"
@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../../projects", "/home/vagrant/projects",
     id: "vagrant-root",
     owner: "vagrant",
-    group: "www-data",
+    group: "vagrant",
     mount_options: ["dmode=775,fmode=664"]
 
 
@@ -30,7 +30,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "modifyvm", :id,
 
       # older cpus
-      #"--hwvirtex", "off",
+      "--hwvirtex", "off",
 
       "--memory", "2048"]
   end
