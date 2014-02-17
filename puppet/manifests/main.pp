@@ -16,4 +16,4 @@ File {
 }
 
 # include baseconfig, mysql
-include baseconfig, php, lighttpd
+include baseconfig, php, mysql, lighttpd

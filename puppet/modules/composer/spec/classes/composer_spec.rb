@@ -1,95 +1,116 @@
 require 'spec_helper'
 
-describe 'composer', :type => :class do
-  let(:title) { 'composer' }
+describe 'composer' do
+  ['RedHat', 'Debian', 'Linux'].each do |osfamily|
+    case osfamily
+    when 'RedHat'
+      php_package = 'php-cli'
+      php_context = '/files/etc/php.ini/PHP'
+      suhosin_context = '/files/etc/suhosin.ini/suhosin'
+    when 'Linux'
+      php_package = 'php-cli'
+      php_context = '/files/etc/php.ini/PHP'
+      suhosin_context = '/files/etc/suhosin.ini/suhosin'
+    when 'Debian'
+      php_package = 'php5-cli'
+      php_context = '/files/etc/php5/cli/php.ini/PHP'
+      suhosin_context = '/files/etc/php5/conf.d/suhosin.ini/suhosin'
+    else
+      php_package = 'php-cli'
+      php_context = '/files/etc/php.ini/PHP'
+      suhosin_context = '/files/etc/suhosin.ini/suhosin'
+    end
 
-  it { should contain_wget__fetch('composer-install') \
-    .with_source('http://getcomposer.org/composer.phar') \
-    .with_execuser('root') \
-    .with_destination('/usr/local/bin/composer')
-  }
+    context "on #{osfamily} operating system family" do
+      let(:facts) { {
+          :osfamily        => osfamily,
+          :operatingsystem => 'Amazon'
+      } }
 
-  it { should contain_exec('composer-fix-permissions') \
-    .with_command('chmod a+x composer') \
-    .with_user('root') \
-    .with_cwd('/usr/local/bin')
-  }
+      it { should contain_class('composer::params') }
 
-  it { should_not contain_exec('composer-update') }
+      it {
+        should contain_exec('download_composer').with({
+          :command     => 'curl -s http://getcomposer.org/installer | php',
+          :cwd         => '/tmp',
+          :creates     => '/tmp/composer.phar',
+          :logoutput   => false,
+        })
+      }
 
-  describe 'with a given target_dir' do
-    let(:params) {{ :target_dir => '/usr/bin' }}
+      it {
+        should contain_augeas('whitelist_phar').with({
+          :context     => suhosin_context,
+          :changes     => 'set suhosin.executor.include.whitelist phar',
+        })
+      }
 
-    it { should contain_wget__fetch('composer-install') \
-      .with_source('http://getcomposer.org/composer.phar') \
-      .with_execuser('root') \
-      .with_destination('/usr/bin/composer')
-    }
+      it {
+        should contain_augeas('allow_url_fopen').with({
+          :context    => php_context,
+          :changes    => 'set allow_url_fopen On',
+        })
+      }
 
-    it { should contain_exec('composer-fix-permissions') \
-      .with_command('chmod a+x composer') \
-      .with_user('root') \
-      .with_cwd('/usr/bin')
-    }
+      context 'with default parameters' do
+        it 'should compile' do
+          compile
+        end
 
-    it { should_not contain_exec('composer-update') }
-  end
+        it { should contain_package(php_package).with_ensure('present') }
+        it { should contain_package('curl').with_ensure('present') }
+        it { should contain_file('/usr/local/bin').with_ensure('directory') }
 
-  describe 'with a given command_name' do
-    let(:params) {{ :command_name => 'c' }}
+        it {
+          should contain_file('/usr/local/bin/composer').with({
+            :source => 'present',
+            :source => '/tmp/composer.phar',
+            :mode   => '0755',
+          })
+        }
+      end
 
-    it { should contain_wget__fetch('composer-install') \
-      .with_source('http://getcomposer.org/composer.phar') \
-      .with_execuser('root') \
-      .with_destination('/usr/local/bin/c')
-    }
+      context "on invalid operating system family" do
+        let(:facts) { {
+          :osfamily        => 'Invalid',
+          :operatingsystem => 'Amazon'
+        } }
 
-    it { should contain_exec('composer-fix-permissions') \
-      .with_command('chmod a+x c') \
-      .with_user('root') \
-      .with_cwd('/usr/local/bin')
-    }
+        it 'should not compile' do
+          expect { should compile }.to raise_error(/Unsupported platform: Invalid/)
+        end
+      end
 
-    it { should_not contain_exec('composer-update') }
-  end
+      context 'with custom parameters' do
+        let(:params) { {
+          :target_dir      => '/you_sir/lowcal/been',
+          :php_package     => 'php8-cli',
+          :composer_file   => 'compozah',
+          :curl_package    => 'kerl',
+          :php_bin         => 'pehpe',
+          :suhosin_enabled => false,
+        } }
 
-  describe 'with auto_update => true' do
-    let(:params) {{ :auto_update => true }}
+        it 'should compile' do
+          compile
+        end
 
-    it { should contain_wget__fetch('composer-install') \
-      .with_source('http://getcomposer.org/composer.phar') \
-      .with_execuser('root') \
-      .with_destination('/usr/local/bin/composer')
-    }
+        it { should contain_package('php8-cli').with_ensure('present') }
+        it { should contain_package('kerl').with_ensure('present') }
+        it { should contain_file('/you_sir/lowcal/been').with_ensure('directory') }
 
-    it { should contain_exec('composer-fix-permissions') \
-      .with_command('chmod a+x composer') \
-      .with_user('root') \
-      .with_cwd('/usr/local/bin')
-    }
+        it {
+          should contain_file('/you_sir/lowcal/been/compozah').with({
+            :source => 'present',
+            :source => '/tmp/composer.phar',
+            :mode   => '0755',
+          })
+        }
 
-    it { should contain_exec('composer-update') \
-      .with_command('composer self-update') \
-      .with_user('root') \
-      .with_path('/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin')
-    }
-  end
+        it { should_not contain_augeas('whitelist_phar') }
+        it { should_not contain_augeas('allow_url_fopen') }
 
-  describe 'with a given user' do
-    let(:params) {{ :user => 'will' }}
-
-    it { should contain_wget__fetch('composer-install') \
-      .with_source('http://getcomposer.org/composer.phar') \
-      .with_execuser('will') \
-      .with_destination('/usr/local/bin/composer')
-    }
-
-    it { should contain_exec('composer-fix-permissions') \
-      .with_command('chmod a+x composer') \
-      .with_user('will') \
-      .with_cwd('/usr/local/bin')
-    }
-
-    it { should_not contain_exec('composer-update') }
+      end
+    end
   end
 end

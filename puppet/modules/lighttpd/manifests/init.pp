@@ -58,10 +58,18 @@ class lighttpd {
   #   refreshonly => true,
   # }
 
-  service { 'lighttpd':
+
+  service {
+    'apache2':
+    ensure => "stopped";
+
+    'lighttpd':
     ensure    => running,
     enable    => true,
-    require   => File["/etc/lighttpd/conf-enabled/10-fastcgi.conf"],
+    require   => [
+      File["/etc/lighttpd/conf-enabled/10-fastcgi.conf"],
+      Service['apache2']
+      ];
   }
 
   # service { "lighttpd":

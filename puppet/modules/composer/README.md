@@ -1,78 +1,155 @@
-puppet-composer
-===============
+# Composer Puppet Module
 
-[![Build
-Status](https://secure.travis-ci.org/willdurand/puppet-composer.png)](http://travis-ci.org/willdurand/puppet-composer)
+[![Build Status](https://travis-ci.org/tPl0ch/puppet-composer.png?branch=master)](https://travis-ci.org/tPl0ch/puppet-composer)
 
-This module installs [Composer](http://getcomposer.org/), a dependency manager
-for PHP.
+## Description
 
-Installation
-------------
+The `puppet-composer` module installs the latest version of Composer from http://getcomposer.org. Composer is a dependency manager for PHP.
 
-Using the Puppet Module Tool, install the
-[`willdurand/composer`](http://forge.puppetlabs.com/willdurand/composer) by
-running the following command:
+## Supported Platforms
 
-    puppet module install willdurand/composer
+* `Debian`
+* `Redhat`
+* `Centos`
+* `Amazon Linux`
 
-Otherwise, close this repository and make sure to install the proper
-dependencies ([`puppet-wget`](https://github.com/maestrodev/puppet-wget)):
+## Installation
 
-    git clone git://github.com/willdurand/puppet-composer.git modules/composer
+#### Puppet Forge
+We recommend installing using the Puppet Forge as it automatically satisfies dependencies.
 
-**Important:** the right `puppet-wget` module is
-[maestrodev/puppet-wget](https://github.com/maestrodev/puppet-wget). You should
-**not** use any other `puppet-wget` module. Example42's module won't work for
-instance. So, please, run the following command:
+    puppet module install --target-dir=/your/path/to/modules tPl0ch-composer
 
-    git clone git://github.com/maestrodev/puppet-wget.git modules/wget
+#### Installation via git submodule
+You can also install as a git submodule and handle the dependencies manually. See the [Dependencies](#dependencies) section below.
 
+    git submodule add git://github.com/tPl0ch/puppet-composer.git modules/composer
 
-Usage
------
+## Dependencies
 
-Include the `composer` class:
+This module requires the following Puppet modules:
+
+* [`puppetlabs-git`](https://github.com/puppetlabs/puppetlabs-git/)
+
+And additional (for puppet version lower than 3.0.0) you need:
+
+* [`libaugeas`](http://augeas.net/) (For automatically updating php.ini settings for suhosin patch)
+
+## Usage
+To install the `composer` binary globally in `/usr/local/bin` you only need to declare the `composer` class. We try to set some sane defaults. There are also a number of parameters you can tweak should the defaults not be sufficient.
+
+### Simple Include
+To install the binary with the defaults you just need to include the following in your manifests:
 
     include composer
 
-You can specify the command name you want to get, and the target directory (aka
-where to install Composer):
+### Full Include
+Alternatively, you can set a number of options by declaring the class with parameters:
 
-    class { 'composer':
-      command_name => 'composer',
-      target_dir   => '/usr/local/bin'
-    }
+```puppet
+class { 'composer':
+    target_dir      => '/usr/local/bin',
+    composer_file   => 'composer', # could also be 'composer.phar'
+    download_method => 'curl',     # or 'wget'
+    logoutput       => false,
+    tmp_path        => '/tmp',
+    php_package     => 'php5-cli',
+    curl_package    => 'curl',
+    wget_package    => 'wget',
+    composer_home   => '/root',
+    php_bin         => 'php', # could also i.e. be 'php -d "apc.enable_cli=0"' for more fine grained control
+    suhosin_enabled => true,
+}
+```
 
-You can also auto update composer by using the `auto_update` parameter. This will
-update Composer **only** when you will run Puppet.
+### Creating Projects
 
-    class { 'composer':
-      auto_update => true
-    }
+The `composer::project` definition provides a way to create projects in a target directory.
 
-You can specify a particular `user` that will be the owner of the Composer
-executable:
+```puppet
+composer::project { 'silex':
+    project_name   => 'fabpot/silex-skeleton',  # REQUIRED
+    target_dir     => '/vagrant/silex', # REQUIRED
+    version        => '2.1.x-dev', # Some valid version string
+    prefer_source  => true,
+    stability      => 'dev', # Minimum stability setting
+    keep_vcs       => false, # Keep the VCS information
+    dev            => true, # Install dev dependencies
+    repository_url => 'http://repo.example.com', # Custom repository URL
+    user           => undef, # Set the user to run as
+}
+```
 
-    class { 'composer':
-      user => 'foo',
-    }
+#### Updating Packages
 
+The `composer::exec` definition provides a more generic wrapper arround composer `update` and `install` commands. The following example will update the `silex/silex` and `symfony/browser-kit` packages in the `/vagrant/silex` directory. You can omit `packages` to update the entire project.
 
-Running the tests
------------------
+```puppet
+composer::exec { 'silex-update':
+    cmd                  => 'update',  # REQUIRED
+    cwd                  => '/vagrant/silex', # REQUIRED
+    packages             => ['silex/silex', 'symfony/browser-kit'], # leave empty or omit to update whole project
+    prefer_source        => false, # Only one of prefer_source or prefer_dist can be true
+    prefer_dist          => false, # Only one of prefer_source or prefer_dist can be true
+    dry_run              => false, # Just simulate actions
+    custom_installers    => false, # No custom installers
+    scripts              => false, # No script execution
+    interaction          => false, # No interactive questions
+    optimize             => false, # Optimize autoloader
+    dev                  => false, # Install dev dependencies
+    user                 => undef, # Set the user to run as
+    refreshonly          => false, # Only run on refresh
+}
+```
 
-Install the dependencies using [Bundler](http://gembundler.com):
+#### Installing Packages
 
-    BUNDLE_GEMFILE=.gemfile bundle install
+We support the `install` command in addition to `update`. The install command will ignore the `packages` parameter and the following example is the equivalent to running `composer install` in the `/vagrant/silex` directory.
 
-Run the following command:
+```puppet
+composer::exec { 'silex-install':
+    cmd                  => 'install',  # REQUIRED
+    cwd                  => '/vagrant/silex', # REQUIRED
+    prefer_source        => false,
+    prefer_dist          => false,
+    dry_run              => false, # Just simulate actions
+    custom_installers    => false, # No custom installers
+    scripts              => false, # No script execution
+    interaction          => false, # No interactive questions
+    optimize             => false, # Optimize autoloader
+    dev                  => false, # Install dev dependencies
+}
+```
 
-    BUNDLE_GEMFILE=.gemfile bundle exec rake spec
+## Development
 
+We have `rspec-puppet` and Travis CI setup for the project. To run the spec tests locally you need `bundler` installed:
 
-License
--------
+```
+gem install bundler
+```
 
-puppet-composer is released under the MIT License. See the bundled LICENSE file
-for details.
+Then you can install the required gems:
+
+```
+bundle install
+```
+
+Finally, the tests can be run:
+
+```
+rake spec
+```
+
+## Contributing
+
+We welcome everyone to help develop this module. To contribute:
+
+* Fork this repository
+* Add features and spec tests for them
+* Commit to feature named branch
+* Open a pull request outlining your changes and the reasoning for them
+
+## Todo
+
+* Add a `composer::require` type
