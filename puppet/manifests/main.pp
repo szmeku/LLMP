@@ -4,9 +4,11 @@ stage { 'pre':
 }
 
 package {[
-		'vim-common',
-		'atool',
+		'vim',
 		'curl',
+      	'unp',
+      	'git',
+      	'lynx',
 
 	]:
 	ensure => present;
@@ -25,4 +27,4 @@ File {
 }
 
 # include baseconfig, mysql
-include baseconfig, mysql, php, lighttpd
+include baseconfig, php, lighttpd
