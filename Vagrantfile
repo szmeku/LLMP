@@ -7,10 +7,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   # 32 BIT
-  # config.vm.box = "ubuntu32"
+  config.vm.box = "debian32"
+  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
 
   # 64 BIT  
-  config.vm.box = "ubuntu64"
+  #config.vm.box = "debian64"
+  #config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x86_64-virtualbox-puppet.box"
+
 
   config.vm.network :private_network, ip: "192.168.33.10"
 
@@ -26,21 +29,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mount_options: ["dmode=775,fmode=664"]
 
 
-  config.vm.provider :virtualbox do |vb|
-     
-	#vb.gui = true,
+  config.vm.provider :virtualbox do |vb|     
+
      vb.customize [
       "modifyvm", :id,
 
       # older cpus
-      # "--hwvirtex", "off",
+      "--hwvirtex", "off",
 
       # many cpus
-      "--cpus", "2",
-      "--ioapic", "on",
+      "--cpus", "1",
+      # "--ioapic", "on",
 
-      # "--memory", "2048"
-      "--memory", "3072"
+      "--memory", "2048"
+      # "--memory", "3072"
     ]
   end
   

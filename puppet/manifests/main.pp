@@ -3,17 +3,6 @@ stage { 'pre':
   before => Stage['main']
 }
 
-package {[
-		'vim',
-		'curl',
-      	'unp',
-      	'git',
-      	'lynx',
-
-	]:
-	ensure => present;
-}
-
 # add the baseconfig module to the new 'pre' run stage
 class { 'baseconfig':
   stage => 'pre'

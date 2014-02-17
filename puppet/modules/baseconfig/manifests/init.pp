@@ -4,6 +4,31 @@
 #
 class baseconfig {
 
+
+  exec {   
+
+    'apt-get update':
+      command => '/usr/bin/sudo /usr/bin/apt-get update';
+    
+  }
+
+  host { 'hostmachine':
+    ip => '192.168.0.1';
+  }
+
+  package {[
+      'vim',
+      'curl',
+      'unp',    
+      'git',
+      'lynx',
+
+    ]:
+    require => Exec['apt-get update'],
+    ensure => present;
+  }
+
+
   # package { 'epel-release':
   #   ensure => present,
   #   provider => 'rpm',
@@ -11,20 +36,6 @@ class baseconfig {
   #   'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm',
   #   # before => Exec['yum update'];
   # }
-
-
-  exec {   
-
-    'apt-get update':
-      command => '/usr/bin/sudo /usr/bin/apt-get update';
-    
-    # 'puppet module install puppetlabs/stdlib':
-    #   command => '/usr/bin/puppet module install puppetlabs/stdlib';
-  # }
-
-  # host { 'hostmachine':
-  #   ip => '192.168.0.1';
-  }
 
   file {
     '/home/vagrant/.bashrc':
