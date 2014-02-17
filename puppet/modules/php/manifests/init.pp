@@ -5,15 +5,17 @@
 
 class php {
   package { [
-             # 'php5-cli',
-             'php5-cgi',
+            'php',
+            'php-mysql',
+            'php-cli',
+             # 'php5-cgi',
              # 'php5-curl',
              # 'php5-dev',
              # 'php5-gd',
              # 'php5-imagick',
              # 'php5-mcrypt',
              # 'php5-memcache',
-             'php5-mysqlnd',
+             # 'php5-mysql',
              # 'php5-pspell',
              # 'php5-sqlite',
              # 'php5-tidy',
@@ -26,9 +28,9 @@ class php {
 
   file {
 
-    '/etc/php5/cgi/php.ini':
+    '/etc/php.ini':
       source  => 'puppet:///modules/php/php.ini',
-      require => Package['php5-cgi'];
+      require => Package['php'];
   }
 
 }

@@ -7,8 +7,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   # 32 BIT
-  config.vm.box = "centos32"
-  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-i386-virtualbox-puppet.box"
+  config.vm.box = "centosik32"
+
+  # 32 BIT
+  # config.vm.box = "centos32"
+  # config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-i386-virtualbox-puppet.box"
 
   # 64 BIT  
   #config.vm.box = "centos64"
@@ -20,12 +23,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../../projects", "/home/vagrant/projects",
     id: "vagrant-root",
     owner: "vagrant",
-    group: "vagrant",
+    group: "lighttpd",
     mount_options: ["dmode=775,fmode=664"]
 
 
   config.vm.provider :virtualbox do |vb|
-  #   vb.gui = true
+     vb.gui = true
      vb.customize [
       "modifyvm", :id,
 

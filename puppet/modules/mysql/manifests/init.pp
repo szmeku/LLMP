@@ -7,22 +7,22 @@ class mysql {
     ensure => present;
   }
 
-  service { 'mysql':
+  service { 'mysqld':
     ensure  => running,
     require => Package['mysql-server'];
   }
 
-  file { '/etc/mysql/my.cnf':
+  file { '/etc/my.cnf':
     source  => 'puppet:///modules/mysql/my.cnf',
     require => Package['mysql-server'],
-    notify  => Service['mysql'];
+    notify  => Service['mysqld'];
   }
 
   exec { 'set-mysql-password':
     unless  => 'mysqladmin -uroot -proot status',
     command => "mysqladmin -uroot password root",
     path    => ['/bin', '/usr/bin'],
-    require => Service['mysql'];
+    require => Service['mysqld'];
   }
 
   # exec { 'load-dynamic-sql':

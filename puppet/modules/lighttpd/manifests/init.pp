@@ -4,7 +4,9 @@
 #
 class lighttpd {
   package { [
-             'lighttpd']:
+             'lighttpd',
+             'lighttpd-fastcgi',
+             ]:
       ensure => present;
   }
 
@@ -12,25 +14,37 @@ class lighttpd {
 
   file {  
 
+    ["/tmp/lighttpd", "/tmp/lighttpd/cache",
+      "/tmp/lighttpd/cache/uploads"]:
+    ensure => "directory",
+    owner  => "lighttpd",
+    group  => "lighttpd";
+
+    "/var/log/lighttpd":
+    ensure => "directory",
+    owner  => "lighttpd",
+    group  => "lighttpd";
+    
+
     '/etc/lighttpd/lighttpd.conf':
     ensure => present,
     source  => 'puppet:///modules/lighttpd/lighttpd.conf',
     notify  => Service["lighttpd"],
     require => Package['lighttpd'];
 
-    "/etc/lighttpd/conf-available/10-fastcgi.conf":
+    "/etc/lighttpd/conf.d/fastcgi.conf":
     ensure => present,
-    source => "puppet:///modules/lighttpd/10-fastcgi.conf",
+    source => "puppet:///modules/lighttpd/fastcgi.conf",
     notify  => Service["lighttpd"],
-    require => Package["lighttpd"];
+    require => Package["lighttpd-fastcgi"];
     # notify => Exec["enable-mod-fastcgi"];
 
   
-    '/etc/lighttpd/conf-enabled/10-fastcgi.conf':
-    ensure => link,
-    target => '/etc/lighttpd/conf-available/10-fastcgi.conf',
-    notify  => Service["lighttpd"],
-    require => File['/etc/lighttpd/conf-available/10-fastcgi.conf'];
+    # '/etc/lighttpd/conf-enabled/10-fastcgi.conf':
+    # ensure => link,
+    # target => '/etc/lighttpd/conf-available/10-fastcgi.conf',
+    # notify  => Service["lighttpd"],
+    # require => File['/etc/lighttpd/conf-available/10-fastcgi.conf'];
     
   }
 
@@ -42,7 +56,7 @@ class lighttpd {
   service { 'lighttpd':
     ensure    => running,
     enable    => true,
-    require   => File["/etc/lighttpd/conf-available/10-fastcgi.conf"],
+    require   => File["/etc/lighttpd/conf.d/fastcgi.conf"],
 }
 
   # service { "lighttpd":

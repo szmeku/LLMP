@@ -4,7 +4,7 @@ stage { 'pre':
 }
 
 package {[
-		'vim',
+		'vim-common',
 		'atool',
 		'curl',
 
