@@ -7,8 +7,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   # 32 BIT
-  config.vm.box = "centosik32"
-
+  config.vm.box = "centki32"
+  # config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.5-i386-v20140110.box"
+  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-i386-v20131103.box"
   # 32 BIT
   # config.vm.box = "centos32"
   # config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-i386-virtualbox-puppet.box"
@@ -28,12 +29,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   config.vm.provider :virtualbox do |vb|
-     vb.gui = true
+     
+	#vb.gui = true,
      vb.customize [
       "modifyvm", :id,
 
       # older cpus
       "--hwvirtex", "off",
+      "--cpus", "1",
+      #"--ioapic", "off",
 
       "--memory", "2048"]
   end
