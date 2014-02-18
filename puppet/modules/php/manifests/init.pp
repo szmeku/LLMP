@@ -21,6 +21,7 @@ class php {
                 'php5-tidy',
                 'php5-xmlrpc',
                 'php5-xsl',
+                'php-apc',
               ]:
               ensure => present;
     }
@@ -32,16 +33,28 @@ class php {
         require => Package['php5-cgi'];
 
 
+
         '/etc/php5/mods-available/xdebug.ini':
         ensure => present,
         source  => 'puppet:///modules/php/xdebug.ini',
         require => Package["php5-xdebug"];
-
       
         '/etc/php5/conf.d/20-xdebug.conf':
         ensure => link,
         target => '/etc/php5/mods-available/xdebug.ini',
         require => File['/etc/php5/mods-available/xdebug.ini'];
+
+
+
+        '/etc/php5/mods-available/apc.ini':
+        ensure => present,
+        source  => 'puppet:///modules/php/apc.ini',
+        require => Package["php-apc"];
+      
+        '/etc/php5/conf.d/10-apc.conf':
+        ensure => link,
+        target => '/etc/php5/mods-available/apc.ini',
+        require => File['/etc/php5/mods-available/apc.ini'];
     }
 
     include composer
