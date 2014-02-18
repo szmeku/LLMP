@@ -61,7 +61,9 @@ class lighttpd {
 
   service {
     'apache2':
-    ensure => "stopped";
+    ensure => "stopped",
+    hasstatus => false,
+    enable => false;
 
     'lighttpd':
     ensure    => running,

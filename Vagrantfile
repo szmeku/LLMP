@@ -6,19 +6,20 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
-  # 32 BIT
-  config.vm.box = "debian32"
-  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
+  if ENV['VHOST_CPU'] == 'old'
+    # 32 BIT
+    config.vm.box = "debian32"
+    config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-i386-virtualbox-puppet.box"
 
-  # 64 BIT  
-  #config.vm.box = "debian64"
-  #config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x86_64-virtualbox-puppet.box"
+  else
+    # 64 BIT  
+    config.vm.box = "debian64"
+    config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/debian-73-x86_64-virtualbox-puppet.box"
+
+  end
 
 
   config.vm.network :private_network, ip: "192.168.33.10"
-
-  config.vm.network "forwarded_port", guest: 80, host: 80
-  config.vm.network "forwarded_port", guest: 3360, host: 3360
 
   # config.vm.synced_folder "../../projects", "/home/vagrant/projects"
 
@@ -31,19 +32,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider :virtualbox do |vb|     
 
-     vb.customize [
-      "modifyvm", :id,
+    if ENV['VHOST_CPU'] == 'old'
+      vb.customize [
+        "modifyvm", :id,
+        "--hwvirtex", "off",
+        "--cpus", "1",
+        "--memory", "2048"]
+    else
 
-      # older cpus
-      "--hwvirtex", "off",
+      vb.customize [
+        "modifyvm", :id,
+        "--hwvirtex", "on",
+        "--cpus", "2",
+        "--ioapic", "on",
+        "--memory", "2048"
+      ]
+    end
 
-      # many cpus
-      "--cpus", "1",
-      # "--ioapic", "on",
-
-      "--memory", "2048"
-      # "--memory", "3072"
-    ]
   end
   
   config.vm.provision :puppet do |puppet|
