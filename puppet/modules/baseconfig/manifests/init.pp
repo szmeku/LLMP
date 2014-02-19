@@ -9,7 +9,9 @@ class baseconfig {
 
     'apt-get update':
       command => '/usr/bin/sudo /usr/bin/apt-get update';
-    
+
+    'sysctl':
+    command => '/usr/bin/sudo /sbin/sysctl -p';
   }
 
   host { 'hostmachine':
@@ -43,6 +45,10 @@ class baseconfig {
       group => 'vagrant',
       mode  => '0644',
       source => 'puppet:///modules/baseconfig/bashrc';
+  
+      '/etc/sysctl.conf':
+      ensure => present,
+      source => 'puppet:///modules/baseconfig/sysctl.conf';
   }
 
 

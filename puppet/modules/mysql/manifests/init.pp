@@ -12,7 +12,7 @@ class mysql {
     require => Package['mysql-server'];
   }
 
-  file { '/etc/my.cnf':
+  file { '/etc/mysql/my.cnf':
     source  => 'puppet:///modules/mysql/my.cnf',
     require => Package['mysql-server'],
     notify  => Service['mysql'];
