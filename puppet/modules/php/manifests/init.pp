@@ -26,24 +26,33 @@ class php {
               ensure => present;
     }
 
+    exec {
+        'move xdebug.so':
+        command => "/usr/bin/sudo /usr/bin/find /usr/lib/php5/ -name 'xdebug.so' -exec mv {} /usr/lib/php5/ ';'",
+        require => Package['php5-xdebug'];
+    }
+
+
     file {
+        '/usr/lib/php5/xdebug.so':
+        ensure => present,
+        before =>  File['/etc/php5/mods-available/xdebug.ini'],
+        require => Exec['move xdebug.so'];
+
 
         '/etc/php5/cgi/php.ini':
         source  => 'puppet:///modules/php/php.ini',
         require => Package['php5-cgi'];
 
 
-
         '/etc/php5/mods-available/xdebug.ini':
         ensure => present,
-        source  => 'puppet:///modules/php/xdebug.ini',
-        require => Package["php5-xdebug"];
+        source  => 'puppet:///modules/php/xdebug.ini';
       
         '/etc/php5/conf.d/20-xdebug.conf':
         ensure => link,
         target => '/etc/php5/mods-available/xdebug.ini',
         require => File['/etc/php5/mods-available/xdebug.ini'];
-
 
 
         '/etc/php5/mods-available/apc.ini':
